@@ -1,3 +1,8 @@
+from pathlib import Path
+from datetime import datetime
+import pandas as pd
+import os
+import csv
 import sys
 import mysql.connector
 
@@ -7,7 +12,10 @@ import mysql.connector
 # IF YOU ARE HAVING ISSUES CONNECTING ENTER BELOW INT CMD PROMPT:  
 # pip install pymysql
 db = mysql.connector.connect(host = "127.0.0.1", port = "3306", user="root", password="1234", database = "cs122a")
+dbcursor = db.cursor()
 functions = ["import_"]
+table_names = ['users', 'producers', 'viewers', 'releases', 'movies', 'series', 'videos', 'sessions', 'reviews']
+
 
 def main():
     if len(sys.argv) < 3:
@@ -23,9 +31,28 @@ def main():
             print(f"Use these instead: {functions}")
 
 
-def import_(user_data):
-    db
-    print("this is being reached.")
+def import_(filepath):
+    if os.path.exists(filepath): 
+        reset_db()
+
+        # file = os.path.join(filepath, "load_data_instructions.txt")
+        # with open(file, "r", encoding="utf-8") as f:
+
+    else:
+        print("Path does not exist")
+
+
+# Reversed due to foreign key dependencies
+def reset_db():
+    with open("database_reset.txt", "r", encoding= "utf-8") as file:
+        reset_query = file.read()
+    dbcursor.execute(reset_query)
+
+
+
+
+
+
 
 
 if __name__ == "__main__":
