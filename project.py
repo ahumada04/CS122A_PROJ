@@ -2,7 +2,7 @@ from pathlib import Path
 from datetime import datetime
 import pandas as pd
 import os
-import csv
+import platform
 import sys
 import mysql.connector
 
@@ -34,25 +34,40 @@ def main():
 def import_(filepath):
     if os.path.exists(filepath): 
         reset_db()
+        dbcursor.execute("SET GLOBAL local_infile = 1;")
+        dbcursor.execute("SET SESSION local_infile = 1;")
+        # db.commit()
 
-        # file = os.path.join(filepath, "load_data_instructions.txt")
-        # with open(file, "r", encoding="utf-8") as f:
-
+        for table in table_names:
+            file = table + ".csv"
+            abs_path = os.path.join(filepath, file)
+            abs_path = os.path.abspath(abs_path)
+            abs_path = abs_path.replace('\\', '/')  # MySQL syntax
+            # Set correct line terminator
+            line_terminator = '\r\n' if platform.system() == "Windows" else '\n'
+            dataload = (
+                f"LOAD DATA LOCAL INFILE '{abs_path}' "
+                f"INTO TABLE {table} "
+                "FIELDS TERMINATED BY ',' "
+                f"LINES TERMINATED BY '{line_terminator}' "
+                "IGNORE 1 ROWS;"
+            )
+            try:
+                dbcursor.execute(dataload)
+                db.commit()
+            except mysql.connector.Error as err:
+                print(f"Error loading {file}: {err}")
+        return True
     else:
         print("Path does not exist")
+        return False
 
 
-# Reversed due to foreign key dependencies
 def reset_db():
     with open("database_reset.txt", "r", encoding= "utf-8") as file:
         reset_query = file.read()
     dbcursor.execute(reset_query)
-
-
-
-
-
-
+    db.commit()
 
 
 if __name__ == "__main__":
