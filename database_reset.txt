@@ -72,7 +72,7 @@ CREATE TABLE sessions(
 	FOREIGN KEY (rid, ep_num) REFERENCES videos(rid, ep_num) 
 ON DELETE NO ACTION );
 
-CREATE TABLE Reviews(
+CREATE TABLE reviews(
 	rvid CHAR(8) NOT NULL,
 	uid CHAR(8) NOT NULL,
 	rid  CHAR(8) NOT NULL,
