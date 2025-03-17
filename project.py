@@ -7,11 +7,11 @@ import sys
 import mysql.connector
 
 # SWITCH TO THIS VERSION WHEN SUBMITING TO GRADESCOPE!!!!!!!!!!!!!!!!!!!!
-# db = mysql.connect(user = 'test', password = 'password', database = 'cs122a')
+db = mysql.connect(user = 'test', password = 'password', database = 'cs122a')
 
 # IF YOU ARE HAVING ISSUES CONNECTING ENTER BELOW INT CMD PROMPT:  
 # pip install pymysql
-db = mysql.connector.connect(host = "127.0.0.1", port = "3306", user="root", password="1234", database = "cs122a", allow_local_infile = True)
+# db = mysql.connector.connect(host = "127.0.0.1", port = "3306", user="root", password="1234", database = "cs122a", allow_local_infile = True)
 dbcursor = db.cursor()
 functions = ["import_", "insertViewer", "addGenre"]
 table_names = ['users', 'producers', 'viewers', 'releases', 'movies', 'series', 'videos', 'sessions', 'reviews']
