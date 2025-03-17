@@ -120,28 +120,28 @@ def insertViewer(uid, email, nickname, address, city, state, zip, genres, joined
 
 
 def addGenre(uid, genre) -> bool:
-    grabQ = f"""
-    SELECT genres 
-    FROM users
-    WHERE uid = {uid}
-    """
-
     try:
+        grabQ = f"""
+        SELECT genres 
+        FROM users
+        WHERE uid = {uid}
+        """
         dbcursor.execute(grabQ)
         currGenres = dbcursor.fetchall()
         if currGenres:
             newGenres = genre.split(';')
             currGenres = currGenres[0][0].split(';')
         else:
-            print("uid not found.")
+            # print("uid not found.")
             return False
     except mysql.connector.Error as err:
-        print(f'Unexpected Error: {err}')
+        # print(f'Unexpected Error: {err}')
         return False
     
     updatedGenres = set(newGenres) | set(currGenres)
     deliminator = ";"
-    if updatedGenres == currGenres:
+
+    if updatedGenres == set(currGenres):
         return False
     
     updated = deliminator.join(updatedGenres)
