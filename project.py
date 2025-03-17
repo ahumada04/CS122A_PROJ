@@ -5,7 +5,7 @@ import sys
 import mysql.connector
 
 # SWITCH TO THIS VERSION WHEN SUBMITING TO GRADESCOPE!!!!!!!!!!!!!!!!!!!!
-db = mysql.connector.connect(user = 'test', password = 'password', database = 'cs122a')
+db = mysql.connector.connect(user = 'test', password = 'password', database = 'cs122a', allow_local_infile=True)
 
 # IF YOU ARE HAVING ISSUES CONNECTING ENTER BELOW INT CMD PROMPT:  
 # pip install pymysql
