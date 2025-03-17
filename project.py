@@ -113,7 +113,7 @@ def insertViewer(uid, email, nickname, address, city, state, zip, genres, joined
         dbcursor.execute(viewerQ)
         db.commit()
     except mysql.connector.Error as err:
-        print(f'Error inserting into users/viewers tables: {err}')
+        # print(f'Error inserting into users/viewers tables: {err}')
         return False
     
     return True
@@ -141,10 +141,10 @@ def addGenre(uid, genre) -> bool:
     
     updatedGenres = set(newGenres) | set(currGenres)
     deliminator = ";"
+    if updatedGenres == currGenres:
+        return False
+    
     updated = deliminator.join(updatedGenres)
-    # TODO
-    # ADD LOGIC TO STOP IF GENRES IS SAME AS OLD GENRES
-
     updateQ = f"""
     UPDATE users 
     SET genres = "{updated}"
