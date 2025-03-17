@@ -30,19 +30,20 @@ def main():
 
 
 def select_function(func_name):
+    passed = None
     match func_name:
         case "import":
             passed = import_(sys.argv[2])
-            if passed:
-                print("Success")
-            else:
-                print("Fail")
         case "insertViewer":
             #             [uid:int] [email:str] [nickname:str] [street:str] [city:str] [state:str] [zip:str] [genres:str] [joined_date:date] [first:str] [last:str] [subscription:str]
-            insertViewer(sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5], sys.argv[6], sys.argv[7], sys.argv[8], sys.argv[9], sys.argv[10], sys.argv[11],  sys.argv[12], sys.argv[13])
+            passed = insertViewer(sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5], sys.argv[6], sys.argv[7], sys.argv[8], sys.argv[9], sys.argv[10], sys.argv[11],  sys.argv[12], sys.argv[13])
         case "addGenre":
             #         [uid:int] [genres:str]
-            addGenre(sys.argv[2], sys.argv[3])
+            passed = addGenre(sys.argv[2], sys.argv[3])
+    if passed:
+        print("Success")
+    elif passed == False:
+        print("Fail")
 
 def import_(filepath) -> bool:
     if not os.path.exists(filepath):
@@ -96,7 +97,7 @@ def import_(filepath) -> bool:
     
 
 #EXAMPLE:         1 test@uci.edu awong "1111 1st street" Irvine CA 92616 "romance;comedy" 2020-04-19 Alice Wong yearly
-def insertViewer(uid, email, nickname, address, city, state, zip, genres, joined, first, last, sub):
+def insertViewer(uid, email, nickname, address, city, state, zip, genres, joined, first, last, sub) -> bool:
     # TODO
     # NEED TO UPDATE WITH NULL HANDLING
     userQ = f"""
@@ -104,7 +105,7 @@ def insertViewer(uid, email, nickname, address, city, state, zip, genres, joined
     VALUES ({uid}, "{email}", "{nickname}","{address}", "{city}", "{state}", "{zip}", "{genres}", "{joined}");
     """
     viewerQ = f"""
-    INSERT INTO viewers (uid, first_name, lastname, subscription) \
+    INSERT INTO viewers (uid, first_name, last_name, subscription) \
     VALUES ({uid}, "{first}", "{last}", "{sub}");
     """
     try:
@@ -118,7 +119,7 @@ def insertViewer(uid, email, nickname, address, city, state, zip, genres, joined
     return True
 
 
-def addGenre(uid, genre):
+def addGenre(uid, genre) -> bool:
     grabQ = f"""
     SELECT genres 
     FROM users
@@ -152,6 +153,7 @@ def addGenre(uid, genre):
     
     dbcursor.execute(updateQ)
     db.commit()
+    return True
 
 
 
