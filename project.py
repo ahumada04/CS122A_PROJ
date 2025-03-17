@@ -1,8 +1,6 @@
 from pathlib import Path
 from datetime import datetime
-import pandas as pd
 import os
-import platform
 import sys
 import mysql.connector
 
