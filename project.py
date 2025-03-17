@@ -55,13 +55,13 @@ def import_(filepath):
             abs_path = abs_path.replace('\\', '/')  # MySQL syntax
             # Set correct line terminator
             line_terminator = '\r\n' if platform.system() == "Windows" else '\n'
-            dataload = (
-                f"LOAD DATA LOCAL INFILE '{abs_path}' "
-                f"INTO TABLE {table} "
-                "FIELDS TERMINATED BY ',' "
-                f"LINES TERMINATED BY '{line_terminator}' "
-                "IGNORE 1 ROWS;"
-            )
+            dataload = f"""
+                LOAD DATA LOCAL INFILE '{abs_path}' 
+                INTO TABLE {table} 
+                FIELDS TERMINATED BY ',' 
+                LINES TERMINATED BY '{line_terminator}' 
+                IGNORE 1 ROWS;
+            """
             try:
                 # dbcursor.execute("SET SESSION local_infile = 1;")
                 # dbcursor.execute("SET GLOBAL local_infile = 1;")
