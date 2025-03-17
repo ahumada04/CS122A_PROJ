@@ -3,13 +3,14 @@ from datetime import datetime
 import os
 import sys
 import mysql.connector
+import csv
 
 # SWITCH TO THIS VERSION WHEN SUBMITING TO GRADESCOPE!!!!!!!!!!!!!!!!!!!!
-db = mysql.connector.connect(user = 'test', password = 'password', database = 'cs122a', allow_local_infile=True)
+db = mysql.connector.connect(user = 'test', password = 'password', database = 'cs122a')
 
 # IF YOU ARE HAVING ISSUES CONNECTING ENTER BELOW INT CMD PROMPT:  
 # pip install pymysql
-# db = mysql.connector.connect(host = "127.0.0.1", port = "3306", user="root", password="1234", database = "cs122a", allow_local_infile = True)
+# db = mysql.connector.connect(host = "127.0.0.1", port = "3306", user="root", password="1234", database = "cs122a")
 dbcursor = db.cursor()
 functions = ["import", "insertViewer", "addGenre"]
 table_names = ['users', 'producers', 'viewers', 'releases', 'movies', 'series', 'videos', 'sessions', 'reviews']
@@ -43,75 +44,48 @@ def import_(filepath):
     if not os.path.exists(filepath):
         print(f"Path {filepath} does not exist")
         return False
+    
     try:
-        # db = mysql.connector.connect(
-        #     host="127.0.0.1", 
-        #     port="3306", 
-        #     user="root", 
-        #     password="1234",
-        #     allow_local_infile=True
-        # )
-        c2 = db.cursor()
-        
-        # Reset database first - execute without selecting a database
+        cursor = db.cursor()
+        # Reset database 
         with open("database_reset.txt", "r", encoding="utf-8") as file:
             reset_script = file.read()
+        try:
+            cursor.execute(reset_script)
+            db.commit()
+        except mysql.connector.Error as err:
+            print(f"Error executing reset statement: {err}")
         
-        # Split and execute statements individually (handles multiple statements)
-        for statement in reset_script.split(';'):
-            if statement.strip():
-                try:
-                    c2.execute(statement)
-                    db.commit()
-                except mysql.connector.Error as err:
-                    print(f"Error executing reset statement: {err}")
-                    print(f"Statement: {statement}")
-                
         for table in table_names:
             csv_file = os.path.join(filepath, f"{table}.csv")
-            abs_path = os.path.abspath(csv_file)
-            if not os.path.exists(abs_path):
-                print(f"Warning: File {abs_path} does not exist, skipping.")
-                continue
-            abs_path = abs_path.replace('\\', '/') # MySQL format
-            try:
-                # Try with Unix-style line endings first
-                load_query = f"""
-                    LOAD DATA LOCAL INFILE '{abs_path}' 
-                    INTO TABLE {table} 
-                    FIELDS TERMINATED BY ',' 
-                    OPTIONALLY ENCLOSED BY '"'
-                    LINES TERMINATED BY '\\n' 
-                    IGNORE 1 ROWS;
-                """
-                c2.execute(load_query)
-                db.commit()
-                print(f"Successfully imported {table}.csv")
-            except mysql.connector.Error as err:
-                print(f"Error loading {table}.csv with Unix endings: {err}")
-                # try:
-                #     # Try with Windows-style line endings
-                #     load_query = f"""
-                #         LOAD DATA LOCAL INFILE '{abs_path}' 
-                #         INTO TABLE {table} 
-                #         FIELDS TERMINATED BY ',' 
-                #         OPTIONALLY ENCLOSED BY '"'
-                #         LINES TERMINATED BY '\\r\\n' 
-                #         IGNORE 1 ROWS;
-                #     """
-                #     cursor.execute(load_query)
-                #     connection.commit()
-                #     print(f"Successfully imported {table}.csv with Windows line endings")
-                # except mysql.connector.Error as second_err:
-                #     print(f"Also failed with Windows line endings: {second_err}")
-        
-        c2.close()
-        db.close()
+            with open(csv_file, 'r') as file:
+                reader = csv.reader(file)
+                headers = next(reader)  # Get column names from first row
+                headers_str = ', '.join(headers)
+                
+                for row in reader:
+                    values = []
+                    for (column, value) in zip(headers, row):
+                        if column.endswith('_id'):
+                            values.append(value)                            
+                        else:
+                            values.append(f"\'{value}\'")
+
+                    values_str = ', '.join(values)
+                    insert_query = f"INSERT INTO {table} ({headers_str}) VALUES ({values_str});"
+
+                    try:
+                        cursor.execute(insert_query)
+                        db.commit()
+                    except mysql.connector.Error as err:
+                        print(f"Error inserting into {table}: {err}")
+                        print(f"Failed query: {insert_query}")
+        cursor.close()
         return True
-    
     except Exception as e:
         print(f"Unexpected error during import: {e}")
         return False
+
     
 
 #EXAMPLE:         1 test@uci.edu awong "1111 1st street" Irvine CA 92616 "romance;comedy" 2020-04-19 Alice Wong yearly
@@ -123,7 +97,7 @@ def insertViewer(uid, email, nickname, address, city, state, zip, genres, joined
     VALUES ({uid}, "{email}", "{nickname}","{address}", "{city}", "{state}", "{zip}", "{genres}", "{joined}");
     """
     viewerQ = f"""
-    INSERT INTO viewers (uid, firstname, lastname, subscription) \
+    INSERT INTO viewers (uid, first_name, lastname, subscription) \
     VALUES ({uid}, "{first}", "{last}", "{sub}");
     """
     try:
