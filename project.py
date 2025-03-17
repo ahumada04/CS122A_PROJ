@@ -32,7 +32,11 @@ def main():
 def select_function(func_name):
     match func_name:
         case "import":
-            import_(sys.argv[2])
+            passed = import_(sys.argv[2])
+            if passed:
+                print("Success")
+            else:
+                print("Fail")
         case "insertViewer":
             #             [uid:int] [email:str] [nickname:str] [street:str] [city:str] [state:str] [zip:str] [genres:str] [joined_date:date] [first:str] [last:str] [subscription:str]
             insertViewer(sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5], sys.argv[6], sys.argv[7], sys.argv[8], sys.argv[9], sys.argv[10], sys.argv[11],  sys.argv[12], sys.argv[13])
@@ -40,7 +44,7 @@ def select_function(func_name):
             #         [uid:int] [genres:str]
             addGenre(sys.argv[2], sys.argv[3])
 
-def import_(filepath):
+def import_(filepath) -> bool:
     if not os.path.exists(filepath):
         print(f"Path {filepath} does not exist")
         return False
@@ -83,7 +87,7 @@ def import_(filepath):
                     except mysql.connector.Error as err:
                         print(f"Error inserting into {table}: {err}")
                         print(f"Failed query: {insert_query}")
-        cursor.close()
+        # cursor.close()
         return True
     except Exception as e:
         print(f"Unexpected error during import: {e}")
