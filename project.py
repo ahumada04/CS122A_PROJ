@@ -11,7 +11,7 @@ import mysql.connector
 
 # IF YOU ARE HAVING ISSUES CONNECTING ENTER BELOW INT CMD PROMPT:  
 # pip install pymysql
-db = mysql.connector.connect(host = "127.0.0.1", port = "3306", user="root", password="1234", database = "cs122a")
+db = mysql.connector.connect(host = "127.0.0.1", port = "3306", user="root", password="1234", database = "cs122a", allow_local_infile = True)
 dbcursor = db.cursor()
 functions = ["import_", "insertViewer", "addGenre"]
 table_names = ['users', 'producers', 'viewers', 'releases', 'movies', 'series', 'videos', 'sessions', 'reviews']
@@ -42,49 +42,79 @@ def select_function(func_name):
             addGenre(sys.argv[2], sys.argv[3])
 
 def import_(filepath):
-    if os.path.exists(filepath): 
-        reset_db()
-        # dbcursor.execute("SET GLOBAL local_infile = 1;")
-        # dbcursor.execute("SET SESSION local_infile = 1;")
-        # db.commit()
-
-        for table in table_names:
-            file = table + ".csv"
-            abs_path = os.path.join(filepath, file)
-            abs_path = os.path.abspath(abs_path)
-            abs_path = abs_path.replace('\\', '/')  # MySQL syntax
-            # Set correct line terminator
-            line_terminator = '\r\n' if platform.system() == "Windows" else '\n'
-            dataload = f"""
-                LOAD DATA LOCAL INFILE '{abs_path}' 
-                INTO TABLE {table} 
-                FIELDS TERMINATED BY ',' 
-                LINES TERMINATED BY '{line_terminator}' 
-                IGNORE 1 ROWS;
-            """
-            try:
-                # dbcursor.execute("SET SESSION local_infile = 1;")
-                # dbcursor.execute("SET GLOBAL local_infile = 1;")
-                dbcursor.execute(dataload)
-                db.commit()
-            except mysql.connector.Error as err:
-                print(f"Error loading {file}: {err}")
-            # print(dataload)
-        return True
-    else:
-        print("Path does not exist")
+    if not os.path.exists(filepath):
+        print(f"Path {filepath} does not exist")
         return False
-
-
-def reset_db():
-    with open("database_reset.txt", "r", encoding= "utf-8") as file:
-        reset_query = file.read()
     try:
-        dbcursor.execute(reset_query)
-        db.commit()
-    except mysql.connector.Error as err:
-        print(f'Error reseting the database: {err}')
-
+        # db = mysql.connector.connect(
+        #     host="127.0.0.1", 
+        #     port="3306", 
+        #     user="root", 
+        #     password="1234",
+        #     allow_local_infile=True
+        # )
+        c2 = db.cursor()
+        
+        # Reset database first - execute without selecting a database
+        with open("database_reset.txt", "r", encoding="utf-8") as file:
+            reset_script = file.read()
+        
+        # Split and execute statements individually (handles multiple statements)
+        for statement in reset_script.split(';'):
+            if statement.strip():
+                try:
+                    c2.execute(statement)
+                    db.commit()
+                except mysql.connector.Error as err:
+                    print(f"Error executing reset statement: {err}")
+                    print(f"Statement: {statement}")
+                
+        for table in table_names:
+            csv_file = os.path.join(filepath, f"{table}.csv")
+            abs_path = os.path.abspath(csv_file)
+            if not os.path.exists(abs_path):
+                print(f"Warning: File {abs_path} does not exist, skipping.")
+                continue
+            abs_path = abs_path.replace('\\', '/') # MySQL format
+            try:
+                # Try with Unix-style line endings first
+                load_query = f"""
+                    LOAD DATA LOCAL INFILE '{abs_path}' 
+                    INTO TABLE {table} 
+                    FIELDS TERMINATED BY ',' 
+                    OPTIONALLY ENCLOSED BY '"'
+                    LINES TERMINATED BY '\\n' 
+                    IGNORE 1 ROWS;
+                """
+                c2.execute(load_query)
+                db.commit()
+                print(f"Successfully imported {table}.csv")
+            except mysql.connector.Error as err:
+                print(f"Error loading {table}.csv with Unix endings: {err}")
+                # try:
+                #     # Try with Windows-style line endings
+                #     load_query = f"""
+                #         LOAD DATA LOCAL INFILE '{abs_path}' 
+                #         INTO TABLE {table} 
+                #         FIELDS TERMINATED BY ',' 
+                #         OPTIONALLY ENCLOSED BY '"'
+                #         LINES TERMINATED BY '\\r\\n' 
+                #         IGNORE 1 ROWS;
+                #     """
+                #     cursor.execute(load_query)
+                #     connection.commit()
+                #     print(f"Successfully imported {table}.csv with Windows line endings")
+                # except mysql.connector.Error as second_err:
+                #     print(f"Also failed with Windows line endings: {second_err}")
+        
+        c2.close()
+        db.close()
+        return True
+    
+    except Exception as e:
+        print(f"Unexpected error during import: {e}")
+        return False
+    
 
 #EXAMPLE:         1 test@uci.edu awong "1111 1st street" Irvine CA 92616 "romance;comedy" 2020-04-19 Alice Wong yearly
 def insertViewer(uid, email, nickname, address, city, state, zip, genres, joined, first, last, sub):
