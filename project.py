@@ -77,7 +77,12 @@ def reset_db():
 
 
 def insertViewer(viewerInfo):
-    
+    insertQ = f"""" 
+    INSERT INTO viewers (uid, firstname, lastame, subscription)" \
+    VALUES ({viewerInfo});
+    """
+    dbcursor.execute(insertQ)
+    db.commit
 
 
 if __name__ == "__main__":
