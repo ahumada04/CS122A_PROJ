@@ -51,7 +51,10 @@ def import_(filepath):
         with open("database_reset.txt", "r", encoding="utf-8") as file:
             reset_script = file.read()
         try:
-            cursor.execute(reset_script)
+            for statement in reset_script.split(";"):  # Splitting statements
+                statement = statement.strip()
+                if statement:  # Ignore empty statements
+                    dbcursor.execute(statement)  # Execute each statement
             db.commit()
         except mysql.connector.Error as err:
             print(f"Error executing reset statement: {err}")
