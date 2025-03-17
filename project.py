@@ -11,7 +11,7 @@ db = mysql.connector.connect(user = 'test', password = 'password', database = 'c
 # pip install pymysql
 # db = mysql.connector.connect(host = "127.0.0.1", port = "3306", user="root", password="1234", database = "cs122a", allow_local_infile = True)
 dbcursor = db.cursor()
-functions = ["import_", "insertViewer", "addGenre"]
+functions = ["import", "insertViewer", "addGenre"]
 table_names = ['users', 'producers', 'viewers', 'releases', 'movies', 'series', 'videos', 'sessions', 'reviews']
 
 
@@ -30,7 +30,7 @@ def main():
 
 def select_function(func_name):
     match func_name:
-        case "import_":
+        case "import":
             import_(sys.argv[2])
         case "insertViewer":
             #             [uid:int] [email:str] [nickname:str] [street:str] [city:str] [state:str] [zip:str] [genres:str] [joined_date:date] [first:str] [last:str] [subscription:str]
