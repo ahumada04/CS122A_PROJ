@@ -76,5 +76,9 @@ def reset_db():
         print(f'Error reseting the database: {err}')
 
 
+def insertViewer(viewerInfo):
+    
+
+
 if __name__ == "__main__":
     main()
