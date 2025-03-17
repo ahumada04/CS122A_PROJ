@@ -19,7 +19,7 @@ table_names = ['users', 'producers', 'viewers', 'releases', 'movies', 'series', 
 
 def main():
     if len(sys.argv) < 3:
-        print("Usage: python <FUNCTION> <YOUR DATA>")
+        print("Usage: python project.py <FUNCTION> <YOUR DATA>")
         sys.exit(1)
     else:
         func_name = sys.argv[1]
@@ -34,8 +34,8 @@ def main():
 def import_(filepath):
     if os.path.exists(filepath): 
         reset_db()
-        dbcursor.execute("SET GLOBAL local_infile = 1;")
-        dbcursor.execute("SET SESSION local_infile = 1;")
+        # dbcursor.execute("SET GLOBAL local_infile = 1;")
+        # dbcursor.execute("SET SESSION local_infile = 1;")
         # db.commit()
 
         for table in table_names:
@@ -53,10 +53,13 @@ def import_(filepath):
                 "IGNORE 1 ROWS;"
             )
             try:
+                # dbcursor.execute("SET SESSION local_infile = 1;")
+                # dbcursor.execute("SET GLOBAL local_infile = 1;")
                 dbcursor.execute(dataload)
                 db.commit()
             except mysql.connector.Error as err:
                 print(f"Error loading {file}: {err}")
+            # print(dataload)
         return True
     else:
         print("Path does not exist")
@@ -66,8 +69,11 @@ def import_(filepath):
 def reset_db():
     with open("database_reset.txt", "r", encoding= "utf-8") as file:
         reset_query = file.read()
-    dbcursor.execute(reset_query)
-    db.commit()
+    try:
+        dbcursor.execute(reset_query)
+        db.commit()
+    except mysql.connector.Error as err:
+        print(f'Error reseting the database: {err}')
 
 
 if __name__ == "__main__":
