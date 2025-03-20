@@ -12,7 +12,7 @@ db = mysql.connector.connect(user = 'test', password = 'password', database = 'c
 # pip install pymysql
 #db = mysql.connector.connect(host = "127.0.0.1", port = "3306", user="root", password="1234", database = "cs122a")
 dbcursor = db.cursor()
-functions = ["import", "insertViewer", "addGenre", "listReleases", "popularRelease"]
+functions = ["import", "insertViewer", "addGenre", "listReleases", "popularRelease", "releaseTitle"]
 table_names = ['users', 'producers', 'viewers', 'releases', 'movies', 'series', 'videos', 'sessions', 'reviews']
 
 
@@ -46,6 +46,10 @@ def select_function(func_name):
         case "popularRelease":
             #         [n:int]
             passed = popularRelease(sys.argv[2])
+        case "releaseTitle":
+            #         [sid:int]
+            passed = releaseTitle(sys.argv[2])
+
     if passed:
         print("Success")
     elif passed == False:
@@ -174,7 +178,7 @@ def addGenre(uid, genre) -> bool:
             
 #     return dataList
 
-def listReleases(uid) -> str:
+def listReleases(uid):
     '''
     Question 8: given a viewer id, list all the unique releases the viewer has reviewed in ASC order on release title.
     strategy: tables; need Reviews and Releases.
@@ -203,7 +207,7 @@ def listReleases(uid) -> str:
         # print(f'Unexpected Error: {err}')
         return False
 
-def popularRelease(N) -> int:
+def popularRelease(N):
     '''
     Question 9: List the top N releases that have the most reviews, in DESCENDING order on reviewCount, rid
     strategy: tables; need Reviews and Releases.
@@ -237,7 +241,38 @@ def popularRelease(N) -> int:
         #print(f'Unexpected Error: {err}')
         return False
 
+def releaseTitle(sid):
+    '''
+    Question 10: Given a session ID, find the release associated with the
+    video streamed in the session.
+    List information on both the release and video,
+    in ASCENDING order on release title.
 
+    strategy: tables = sessions, releases, videos
+
+    input: python3 project.py releaseTitle [sid: int]
+	EXAMPLE: python3 project.py releaseTitle 123
+    output: Table - rid, release_title, genre, video_title, ep_num, length
+    '''
+    try:
+        grabQ = f"""
+        SELECT CAST(r.rid AS CHAR) AS rid, r.title AS release_title, r.genre, v.title AS video_title, CAST(s.ep_num AS CHAR) AS ep_num, CAST(v.length AS CHAR) AS length
+            FROM     sessions s
+            JOIN     releases r ON s.rid = r.rid
+            JOIN     videos v ON s.rid = v.rid AND s.ep_num = v.ep_num
+            WHERE    s.sid = {sid}
+            ORDER BY r.title ASC;
+        """
+        dbcursor.execute(grabQ)
+        currTitles = dbcursor.fetchall()
+        if currTitles:
+            tablePrinter(currTitles)
+        else:
+            # print("uid not found.")
+            return False
+    except mysql.connector.Error as err:
+        # print(f'Unexpected Error: {err}')
+        return False
 
 def tablePrinter(table):
     '''table printing helper function.
