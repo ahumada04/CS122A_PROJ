@@ -6,13 +6,13 @@ import mysql.connector
 import csv
 
 # SWITCH TO THIS VERSION WHEN SUBMITING TO GRADESCOPE!!!!!!!!!!!!!!!!!!!!
-# db = mysql.connector.connect(user = 'test', password = 'password', database = 'cs122a')
+#db = mysql.connector.connect(user = 'test', password = 'password', database = 'cs122a')
 
 # IF YOU ARE HAVING ISSUES CONNECTING ENTER BELOW INT CMD PROMPT:  
 # pip install pymysql
 db = mysql.connector.connect(host = "127.0.0.1", port = "3306", user="root", password="1234", database = "cs122a")
 dbcursor = db.cursor()
-functions = ["import", "insertViewer", "addGenre"]
+functions = ["import", "insertViewer", "addGenre", "listReleases"]
 table_names = ['users', 'producers', 'viewers', 'releases', 'movies', 'series', 'videos', 'sessions', 'reviews']
 
 
@@ -40,6 +40,9 @@ def select_function(func_name):
         case "addGenre":
             #         [uid:int] [genres:str]
             passed = addGenre(sys.argv[2], sys.argv[3])
+        case "listReleases":
+            #       [uid:int]
+            passed = listReleases(sys.argv[2])
     if passed:
         print("Success")
     elif passed == False:
@@ -168,6 +171,48 @@ def addGenre(uid, genre) -> bool:
             
 #     return dataList
 
+def listReleases(uid) -> str:
+    '''
+    Question 8: given a viewer id, list all the unique releases the viewer has reviewed in ASC order on release title.
+    strategy: tables; need Reviews and Releases.
+        grab all reviews by the given vid, and replace the rid with the release title. sort asc.
+    input: python3 project.py listReleases [uid:int]
+    example: python3 project.py listReleases 1
+    output: Table - rid, genre, title
+    '''
+    try:
+        grabQ = f"""
+        SELECT DISTINCT rid, genre, title
+        FROM releases
+        WHERE rid IN (SELECT rid 
+        FROM reviews
+        WHERE uid = {uid})
+        ORDER BY title ASC
+        """
+        dbcursor.execute(grabQ)
+        currTitles = dbcursor.fetchall()
+        if currTitles:
+            tablePrinter(currTitles)
+        else:
+            # print("uid not found.")
+            return False
+    except mysql.connector.Error as err:
+        # print(f'Unexpected Error: {err}')
+        return False
+
+
+
+
+
+def tablePrinter(table):
+    '''table printing helper function.
+     given table (which is a list)
+     go through the list, printing the tuples within separated by a single comma.
+     newline when done with a tuple.
+     '''
+    tempString = ","
+    for row in table:
+        print(tempString.join(row))
 
 if __name__ == "__main__":
     main()
