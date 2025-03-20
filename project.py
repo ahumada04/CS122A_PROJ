@@ -274,6 +274,28 @@ def releaseTitle(sid):
         # print(f'Unexpected Error: {err}')
         return False
 
+def activeViewer(N, start, end):
+    '''
+    Question 11: Find all active viewers that have started a session more than N times (including N) in a specific time range (including start and end date), in ASCENDING order by uid. N will be at least 1.
+    strategy: tables;
+    input: python3 project.py activeViewer [N:int] [start:date] [end:date]
+	EXAMPLE: python3 project.py activeViewer 5 2023-01-09 2023-03-10
+    output: Table - UID, first name, last name
+    '''
+    try:
+        grabQ = f"""
+        """
+        dbcursor.execute(grabQ)
+        currTitles = dbcursor.fetchall()
+        if currTitles:
+            tablePrinter(currTitles)
+        else:
+            # print("uid not found.")
+            return False
+    except mysql.connector.Error as err:
+        # print(f'Unexpected Error: {err}')
+        return False
+
 def tablePrinter(table):
     '''table printing helper function.
      given table (which is a list)
