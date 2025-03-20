@@ -12,7 +12,7 @@ db = mysql.connector.connect(user = 'test', password = 'password', database = 'c
 # pip install pymysql
 #db = mysql.connector.connect(host = "127.0.0.1", port = "3306", user="root", password="1234", database = "cs122a")
 dbcursor = db.cursor()
-functions = ["import", "insertViewer", "addGenre", "listReleases", "popularRelease", "releaseTitle", "activeViewer", "videosViewed"]
+functions = ["import", "insertViewer", "addGenre", "listReleases", "popularRelease", "releaseTitle", "activeViewer", "videosViewed", "deleteViewer"]
 table_names = ['users', 'producers', 'viewers', 'releases', 'movies', 'series', 'videos', 'sessions', 'reviews']
 
 
@@ -109,7 +109,6 @@ def import_(filepath) -> bool:
     except Exception as e:
         print(f"Unexpected error during import: {e}")
         return False
-
     
 
 #EXAMPLE:         1 test@uci.edu awong "1111 1st street" Irvine CA 92616 "romance;comedy" 2020-04-19 Alice Wong yearly
