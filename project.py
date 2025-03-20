@@ -12,7 +12,7 @@ db = mysql.connector.connect(user = 'test', password = 'password', database = 'c
 # pip install pymysql
 #db = mysql.connector.connect(host = "127.0.0.1", port = "3306", user="root", password="1234", database = "cs122a")
 dbcursor = db.cursor()
-functions = ["import", "insertViewer", "addGenre", "listReleases", "popularRelease", "releaseTitle"]
+functions = ["import", "insertViewer", "addGenre", "listReleases", "popularRelease", "releaseTitle", "activeViewer"]
 table_names = ['users', 'producers', 'viewers', 'releases', 'movies', 'series', 'videos', 'sessions', 'reviews']
 
 
@@ -49,6 +49,9 @@ def select_function(func_name):
         case "releaseTitle":
             #         [sid:int]
             passed = releaseTitle(sys.argv[2])
+        case "activeViewer":
+            #         [N:int] [start:date] [end:date]
+            passed = activeViewer(sys.argv[2], sys.argv[3], sys.argv[4])
 
     if passed:
         print("Success")
@@ -282,9 +285,25 @@ def activeViewer(N, start, end):
 	EXAMPLE: python3 project.py activeViewer 5 2023-01-09 2023-03-10
     output: Table - UID, first name, last name
     '''
+
+
+    start += " 00:00:00"
+    end += " 00:00:00"
+
+    start = f'"{start}"'
+    end = f'"{end}"'
+
     try:
         grabQ = f"""
+        SELECT CAST(v.uid AS CHAR) AS uid, v.first_name, v.last_name
+        FROM     sessions s
+        JOIN     viewers v ON s.uid = v.uid
+        WHERE    s.initiate_at BETWEEN {start} AND {end}
+        GROUP BY     v.uid, v.first_name, v.last_name
+        HAVING     COUNT(s.sid) >= {N}
+        ORDER BY     v.uid ASC;
         """
+
         dbcursor.execute(grabQ)
         currTitles = dbcursor.fetchall()
         if currTitles:
@@ -293,7 +312,7 @@ def activeViewer(N, start, end):
             # print("uid not found.")
             return False
     except mysql.connector.Error as err:
-        # print(f'Unexpected Error: {err}')
+        print(f'Unexpected Error: {err}')
         return False
 
 def tablePrinter(table):
