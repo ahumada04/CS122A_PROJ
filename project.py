@@ -12,7 +12,7 @@ db = mysql.connector.connect(user = 'test', password = 'password', database = 'c
 # pip install pymysql
 #db = mysql.connector.connect(host = "127.0.0.1", port = "3306", user="root", password="1234", database = "cs122a")
 dbcursor = db.cursor()
-functions = ["import", "insertViewer", "addGenre", "listReleases", "popularRelease", "releaseTitle", "activeViewer"]
+functions = ["import", "insertViewer", "addGenre", "listReleases", "popularRelease", "releaseTitle", "activeViewer", "videosViewed"]
 table_names = ['users', 'producers', 'viewers', 'releases', 'movies', 'series', 'videos', 'sessions', 'reviews']
 
 
@@ -52,6 +52,9 @@ def select_function(func_name):
         case "activeViewer":
             #         [N:int] [start:date] [end:date]
             passed = activeViewer(sys.argv[2], sys.argv[3], sys.argv[4])
+        case "videosViewed":
+            #         [rid:int]
+            passed = videosViewed(sys.argv[2])
 
     if passed:
         print("Success")
@@ -313,6 +316,44 @@ def activeViewer(N, start, end):
             return False
     except mysql.connector.Error as err:
         print(f'Unexpected Error: {err}')
+        return False
+
+def videosViewed(rid):
+    '''
+    Question 12: Given a Video rid, count the number of unique viewers that have
+    started a session on it. Videos that are not streamed by any viewer should
+    have a count of 0 instead of NULL. Return video information along with the
+    count in DESCENDING order by rid.
+
+    strategy: tables = sessions, releases, videos
+
+    input: python3 project.py videosViewed [rid: int]
+    EXAMPLE: python3 project.py videosViewed 123
+
+    output: Table -
+    '''
+    try:
+        grabQ = f"""
+        SELECT  CAST(v.rid AS CHAR) AS rid, 
+                CAST(v.ep_num AS CHAR) AS ep_num, 
+                v.title, 
+                CAST(v.length AS CHAR) AS length, 
+                CAST(COALESCE(COUNT(DISTINCT s.uid), 0) AS CHAR) AS viewer_count
+        FROM        videos v
+        LEFT JOIN   sessions s ON v.rid = s.rid AND v.ep_num = s.ep_num
+        WHERE   v.rid = {rid}
+        GROUP BY    v.rid, v.ep_num, v.title, v.length
+        ORDER BY     v.rid DESC;
+        """
+        dbcursor.execute(grabQ)
+        currTitles = dbcursor.fetchall()
+        if currTitles:
+            tablePrinter(currTitles)
+        else:
+            # print("uid not found.")
+            return False
+    except mysql.connector.Error as err:
+        # print(f'Unexpected Error: {err}')
         return False
 
 def tablePrinter(table):
