@@ -184,6 +184,54 @@ def addGenre(uid, genre) -> bool:
             
 #     return dataList
 
+
+#4- Delete viewer
+def deleteViewer(uid: int) -> bool:
+    try:
+        delete_viewer = f"DELETE FROM viewers WHERE uid = {uid};"
+        delete_user = f"DELETE FROM users WHERE uid = {uid};"
+        dbcursor.execute(delete_viewer)
+        dbcursor.execute(delete_user)
+        db.commit()
+        return True
+    except mysql.connector.Error as err:
+        return False
+
+#5 - insert
+def insertMovie(rid: int, website_url: str) -> bool:
+    try:
+        insert_movie = f"INSERT INTO movies (rid, website_url) VALUES ({rid}, '{website_url}');"
+        dbcursor.execute(insert_movie)
+        db.commit()
+        return True
+    except mysql.connector.Error as err:
+        return False
+
+#6 - insert session
+def insertSession(sid: int, uid: int, rid: int, ep_num: int, initiate_at: str, leave_at: str, quality: str, device: str) -> bool:
+    try:
+        insert_session = f"""
+        INSERT INTO sessions (sid, uid, rid, ep_num, initiate_at, leave_at, quality, device)
+        VALUES ({sid}, {uid}, {rid}, {ep_num}, '{initiate_at}', '{leave_at}', '{quality}', '{device}');
+        """
+        dbcursor.execute(insert_session)
+        db.commit()
+        return True
+    except mysql.connector.Error as err:
+        return False
+
+#7 - update release
+def updateRelease(rid: int, title:str) -> bool:
+    try:
+        update_query = f"UPDATE releases SET title = '{title}' WHERE rid = {rid};"
+        dbcursor.execute(update_release_query)
+        db.commit()
+        return True
+    except mysql.connector.Error as err:
+        return False
+
+
+
 def listReleases(uid):
     '''
     Question 8: given a viewer id, list all the unique releases the viewer has reviewed in ASC order on release title.
