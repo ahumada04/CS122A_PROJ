@@ -6,13 +6,13 @@ import mysql.connector
 import csv
 
 # SWITCH TO THIS VERSION WHEN SUBMITING TO GRADESCOPE!!!!!!!!!!!!!!!!!!!!
-#db = mysql.connector.connect(user = 'test', password = 'password', database = 'cs122a')
+db = mysql.connector.connect(user = 'test', password = 'password', database = 'cs122a')
 
 # IF YOU ARE HAVING ISSUES CONNECTING ENTER BELOW INT CMD PROMPT:  
 # pip install pymysql
-db = mysql.connector.connect(host = "127.0.0.1", port = "3306", user="root", password="1234", database = "cs122a")
+#db = mysql.connector.connect(host = "127.0.0.1", port = "3306", user="root", password="1234", database = "cs122a")
 dbcursor = db.cursor()
-functions = ["import", "insertViewer", "addGenre", "listReleases"]
+functions = ["import", "insertViewer", "addGenre", "listReleases", "popularRelease"]
 table_names = ['users', 'producers', 'viewers', 'releases', 'movies', 'series', 'videos', 'sessions', 'reviews']
 
 
@@ -43,6 +43,9 @@ def select_function(func_name):
         case "listReleases":
             #       [uid:int]
             passed = listReleases(sys.argv[2])
+        case "popularRelease":
+            #         [n:int]
+            passed = popularRelease(sys.argv[2])
     if passed:
         print("Success")
     elif passed == False:
@@ -200,7 +203,39 @@ def listReleases(uid) -> str:
         # print(f'Unexpected Error: {err}')
         return False
 
+def popularRelease(N) -> int:
+    '''
+    Question 9: List the top N releases that have the most reviews, in DESCENDING order on reviewCount, rid
+    strategy: tables; need Reviews and Releases.
+        grab rid,title and
+        create a reviewCount var (the number of times a release has been reviewed)
 
+    input: python3 project.py popularRelease [N: int]
+    	EXAMPLE: python3 project.py popularRelease 10
+    output: Table - rid, title, reviewCount
+    '''
+
+    N = int(N)
+    try:
+        grabQ = f"""
+        SELECT r.rid, r.title, CAST(COUNT(rv.rid) AS CHAR) AS review_count
+        FROM releases r
+        LEFT JOIN reviews rv ON r.rid = rv.rid
+        GROUP BY r.rid
+        ORDER BY review_count DESC;
+        """
+        dbcursor.execute(grabQ)
+        currTitles = dbcursor.fetchall()
+        if currTitles:
+            tempString = ","
+            for row in currTitles:
+                if N > 0:
+                    print(tempString.join(row))
+                    N = N - 1
+
+    except mysql.connector.Error as err:
+        #print(f'Unexpected Error: {err}')
+        return False
 
 
 
