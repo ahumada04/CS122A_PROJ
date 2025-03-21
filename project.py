@@ -203,16 +203,14 @@ def deleteViewer(uid: int) -> bool:
 
         # Delete viewer
         dbcursor.execute(f"DELETE FROM viewers WHERE uid = {uid};")
-        db.commit()  # Commit after deleting viewer
+        db.commit() 
 
-        # Delete user (only after the viewer is successfully deleted)
         dbcursor.execute(f"DELETE FROM users WHERE uid = {uid};")
-        db.commit()  # Commit after deleting user
+        db.commit()  
 
-        # Verify deletion by checking if the uid still exists
         dbcursor.execute(f"SELECT uid FROM users WHERE uid = {uid};")
         if dbcursor.fetchone():
-            return False  # If UID still exists in `users`, deletion failed
+            return False  
 
         return True
 
@@ -243,14 +241,12 @@ def insertSession(sid: int, uid: int, rid: int, ep_num: int, initiate_at: str, l
 
         dbcursor.execute(f"SELECT uid FROM viewers WHERE uid = {uid};")
         if not dbcursor.fetchone():
-            return False  # Viewer not found
+            return False  
 
-        # Ensure Video exists
         dbcursor.execute(f"SELECT rid FROM videos WHERE rid = {rid} AND ep_num = {ep_num};")
         if not dbcursor.fetchone():
-            return False  # Video not found
+            return False 
 
-        # Insert session
         insert_session = f"""
         INSERT INTO sessions (sid, uid, rid, ep_num, initiate_at, leave_at, quality, device)
         VALUES ({sid}, {uid}, {rid}, {ep_num}, '{initiate_at}', '{leave_at}', '{quality}', '{device}');
