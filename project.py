@@ -330,7 +330,7 @@ def popularRelease(N):
             for row in currTitles:
                 if N > 0:
                     print(tempString.join(row))
-                    N = N
+                    N = N - 1
     except mysql.connector.Error as err:
         #print(f'Unexpected Error: {err}')
         return False
