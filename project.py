@@ -194,13 +194,18 @@ def deleteViewer(uid: int) -> bool:
         # dbcursor.execute(delete_viewer)
         # dbcursor.execute(delete_user)
 
+        dbcursor.execute(f"SELECT uid FROM viewers WHERE uid = {uid};")
+        if not dbcursor.fetchone():
+            return False  # Fail if UID does not exist
+
+        # Delete dependent records first
         dbcursor.execute(f"DELETE FROM sessions WHERE uid = {uid};")
         dbcursor.execute(f"DELETE FROM reviews WHERE uid = {uid};")
 
+        # Delete viewer and user
         dbcursor.execute(f"DELETE FROM viewers WHERE uid = {uid};")
         dbcursor.execute(f"DELETE FROM users WHERE uid = {uid};")
         
-
         db.commit()
         return True
     except mysql.connector.Error as err:
@@ -220,6 +225,24 @@ def insertMovie(rid: int, website_url: str) -> bool:
 #6 - insert session
 def insertSession(sid: int, uid: int, rid: int, ep_num: int, initiate_at: str, leave_at: str, quality: str, device: str) -> bool:
     try:
+        # insert_session = f"""
+        # INSERT INTO sessions (sid, uid, rid, ep_num, initiate_at, leave_at, quality, device)
+        # VALUES ({sid}, {uid}, {rid}, {ep_num}, '{initiate_at}', '{leave_at}', '{quality}', '{device}');
+        # """
+        # dbcursor.execute(insert_session)
+        # db.commit()
+        # return True
+
+        dbcursor.execute(f"SELECT uid FROM viewers WHERE uid = {uid};")
+        if not dbcursor.fetchone():
+            return False  # Viewer not found
+
+        # Ensure Video exists
+        dbcursor.execute(f"SELECT rid FROM videos WHERE rid = {rid} AND ep_num = {ep_num};")
+        if not dbcursor.fetchone():
+            return False  # Video not found
+
+        # Insert session
         insert_session = f"""
         INSERT INTO sessions (sid, uid, rid, ep_num, initiate_at, leave_at, quality, device)
         VALUES ({sid}, {uid}, {rid}, {ep_num}, '{initiate_at}', '{leave_at}', '{quality}', '{device}');
@@ -227,6 +250,7 @@ def insertSession(sid: int, uid: int, rid: int, ep_num: int, initiate_at: str, l
         dbcursor.execute(insert_session)
         db.commit()
         return True
+
     except mysql.connector.Error as err:
         return False
 
@@ -349,7 +373,7 @@ def activeViewer(N, start, end):
 
 
     start += " 00:00:00"
-    end += " 00:00:00"
+    end += " 23:59:59"
 
     start = f'"{start}"'
     end = f'"{end}"'
