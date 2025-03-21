@@ -188,7 +188,7 @@ def addGenre(uid, genre) -> bool:
 
 #4- Delete viewer
 def deleteViewer(uid: int) -> bool:
-    # try:
+    try:
     #     # delete_viewer = f"DELETE FROM viewers WHERE uid = {uid};"
     #     # delete_user = f"DELETE FROM users WHERE uid = {uid};"
     #     # dbcursor.execute(delete_viewer)
