@@ -65,7 +65,7 @@ def select_function(func_name):
             passed = activeViewer(sys.argv[2], sys.argv[3], sys.argv[4])
         case "videosViewed":
             #         [rid:int]
-            passed = videosViewed(sys.argv[2])
+            videosViewed(sys.argv[2])
         case "insertMovie":  
             passed = insertMovie(sys.argv[2], sys.argv[3])
 
@@ -423,10 +423,11 @@ def videosViewed(rid):
                 CAST(v.length AS CHAR) AS length, 
                 CAST(COALESCE(COUNT(DISTINCT s.uid), 0) AS CHAR) AS viewer_count
         FROM        videos v
-        LEFT JOIN   sessions s ON v.rid = s.rid AND v.ep_num = s.ep_num
+        LEFT JOIN   sessions s ON v.rid = s.rid 
         WHERE   v.rid = {rid}
         GROUP BY    v.rid, v.ep_num, v.title, v.length
         ORDER BY     viewer_count DESC;
+        
         """
 # ORDER BY     v.rid DESC;
 
