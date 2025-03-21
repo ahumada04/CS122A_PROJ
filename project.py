@@ -328,6 +328,7 @@ def listReleases(uid):
         currTitles = dbcursor.fetchall()
         if currTitles:
             tablePrinter(currTitles)
+            return True
         else:
             # print("uid not found.")
             return False
