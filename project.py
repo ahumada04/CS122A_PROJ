@@ -196,18 +196,26 @@ def deleteViewer(uid: int) -> bool:
 
         dbcursor.execute(f"SELECT uid FROM viewers WHERE uid = {uid};")
         if not dbcursor.fetchone():
-            return False  # Fail if UID does not exist
-
-        # Delete dependent records first
+            return False  
+        
         dbcursor.execute(f"DELETE FROM sessions WHERE uid = {uid};")
         dbcursor.execute(f"DELETE FROM reviews WHERE uid = {uid};")
 
-        # Delete viewer and user
+        # Delete viewer
         dbcursor.execute(f"DELETE FROM viewers WHERE uid = {uid};")
+        db.commit()  # Commit after deleting viewer
+
+        # Delete user (only after the viewer is successfully deleted)
         dbcursor.execute(f"DELETE FROM users WHERE uid = {uid};")
-        
-        db.commit()
+        db.commit()  # Commit after deleting user
+
+        # Verify deletion by checking if the uid still exists
+        dbcursor.execute(f"SELECT uid FROM users WHERE uid = {uid};")
+        if dbcursor.fetchone():
+            return False  # If UID still exists in `users`, deletion failed
+
         return True
+        
     except mysql.connector.Error as err:
         print(f"Database Error: {err}")
         return False
