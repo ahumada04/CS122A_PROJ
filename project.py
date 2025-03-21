@@ -209,19 +209,44 @@ def deleteViewer(uid: int) -> bool:
         if not dbcursor.fetchone():
             return False  
         
+        # dbcursor.execute(f"DELETE FROM sessions WHERE uid = {uid};")
+        # dbcursor.execute(f"DELETE FROM reviews WHERE uid = {uid};")
+
+        # # Delete viewer
+        # dbcursor.execute(f"DELETE FROM viewers WHERE uid = {uid};")
+        # db.commit() 
+
+        # dbcursor.execute(f"DELETE FROM users WHERE uid = {uid};")
+        # db.commit()  
+
+        # dbcursor.execute(f"SELECT uid FROM users WHERE uid = {uid};")
+        # if dbcursor.fetchone():
+        #     return False  
+
+
+        dbcursor.execute(f"SELECT uid FROM producers WHERE uid = {uid};")
+        is_producer = dbcursor.fetchone()
+
+        if is_producer:
+            # Delete releases made by this producer
+            dbcursor.execute(f"DELETE FROM releases WHERE producer_uid = {uid};")
+            db.commit()
+
+            # Delete producer record
+            dbcursor.execute(f"DELETE FROM producers WHERE uid = {uid};")
+            db.commit()
+
+        # Delete sessions and reviews
         dbcursor.execute(f"DELETE FROM sessions WHERE uid = {uid};")
         dbcursor.execute(f"DELETE FROM reviews WHERE uid = {uid};")
+        db.commit()
 
-        # Delete viewer
+        # Delete viewer and user
         dbcursor.execute(f"DELETE FROM viewers WHERE uid = {uid};")
-        db.commit() 
+        db.commit()
 
         dbcursor.execute(f"DELETE FROM users WHERE uid = {uid};")
-        db.commit()  
-
-        dbcursor.execute(f"SELECT uid FROM users WHERE uid = {uid};")
-        if dbcursor.fetchone():
-            return False  
+        db.commit()
 
         return True
 
