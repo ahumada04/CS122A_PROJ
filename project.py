@@ -12,7 +12,7 @@ db = mysql.connector.connect(user = 'test', password = 'password', database = 'c
 # pip install pymysql
 #db = mysql.connector.connect(host = "127.0.0.1", port = "3306", user="root", password="1234", database = "cs122a")
 dbcursor = db.cursor()
-functions = ["import", "insertViewer", "addGenre", "listReleases", "popularRelease", "releaseTitle", "activeViewer", "videosViewed", "deleteViewer", "insertSession", "updateRelease"]
+functions = ["import", "insertViewer", "addGenre", "listReleases", "popularRelease", "releaseTitle", "activeViewer", "videosViewed", "deleteViewer", "insertSession", "updateRelease", "insertMovie"]
 table_names = ['users', 'producers', 'viewers', 'releases', 'movies', 'series', 'videos', 'sessions', 'reviews']
 
 
@@ -27,7 +27,6 @@ def main():
         else:
             print("Not a function.")
             print(f"Use these instead: {functions}")
-
 
 def select_function(func_name):
     passed = None
@@ -55,6 +54,9 @@ def select_function(func_name):
         case "videosViewed":
             #         [rid:int]
             passed = videosViewed(sys.argv[2])
+        case "insertMovie":  
+            passed = insertMovie(sys.argv[2], sys.argv[3])
+
 
     if passed:
         print("Success")
@@ -187,10 +189,18 @@ def addGenre(uid, genre) -> bool:
 #4- Delete viewer
 def deleteViewer(uid: int) -> bool:
     try:
-        delete_viewer = f"DELETE FROM viewers WHERE uid = {uid};"
-        delete_user = f"DELETE FROM users WHERE uid = {uid};"
-        dbcursor.execute(delete_viewer)
-        dbcursor.execute(delete_user)
+        # delete_viewer = f"DELETE FROM viewers WHERE uid = {uid};"
+        # delete_user = f"DELETE FROM users WHERE uid = {uid};"
+        # dbcursor.execute(delete_viewer)
+        # dbcursor.execute(delete_user)
+
+        dbcursor.execute(f"DELETE FROM sessions WHERE uid = {uid};")
+        dbcursor.execute(f"DELETE FROM reviews WHERE uid = {uid};")
+
+        dbcursor.execute(f"DELETE FROM viewers WHERE uid = {uid};")
+        dbcursor.execute(f"DELETE FROM users WHERE uid = {uid};")
+        
+
         db.commit()
         return True
     except mysql.connector.Error as err:
@@ -224,7 +234,7 @@ def insertSession(sid: int, uid: int, rid: int, ep_num: int, initiate_at: str, l
 def updateRelease(rid: int, title:str) -> bool:
     try:
         update_query = f"UPDATE releases SET title = '{title}' WHERE rid = {rid};"
-        dbcursor.execute(update_release_query)
+        dbcursor.execute(update_query)
         db.commit()
         return True
     except mysql.connector.Error as err:
