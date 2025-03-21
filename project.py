@@ -277,11 +277,19 @@ def listReleases(uid):
     '''
     try:
         grabQ = f"""
-        SELECT DISTINCT r.rid, r.genre, r.title
-        FROM releases r
-        JOIN reviews rev ON r.rid = rev.rid
-        ORDER BY r.title ASC
+        SELECT DISTINCT rid, genre, title
+        FROM releases
+        WHERE rid IN (SELECT rid 
+        FROM reviews
+        WHERE uid = {uid})
+        ORDER BY title ASC
         """
+        # grabQ = f"""
+        # SELECT DISTINCT r.rid, r.genre, r.title
+        # FROM releases r
+        # JOIN reviews rev ON r.rid = rev.rid
+        # ORDER BY r.title ASC
+        # """
         dbcursor.execute(grabQ)
         currTitles = dbcursor.fetchall()
         if currTitles:
