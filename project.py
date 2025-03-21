@@ -324,14 +324,22 @@ def popularRelease(N):
         LIMIT {N};
         """
         dbcursor.execute(grabQ)
-        currTitles = dbcursor.fetchall()
-        if currTitles:
-            tempString = ","
-            for row in currTitles:
-                if N > 0:
-                    print(tempString.join(row))
-                    N = N - 1
+        # currTitles = dbcursor.fetchall()
+        # if currTitles:
+        #     tempString = ","
+        #     for row in currTitles:
+        #         if N > 0:
+        #             print(tempString.join(row))
+        #             N = N - 1
 
+        rows = dbcursor.fetchall()
+        if rows:
+            # Ensure all elements are converted to string
+            tablePrinter([(str(rid), title, str(review_count)) for rid, title, review_count in rows])
+            return True
+        else:
+            print("Fail")
+            return False
     except mysql.connector.Error as err:
         #print(f'Unexpected Error: {err}')
         return False
