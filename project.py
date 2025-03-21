@@ -52,7 +52,7 @@ def select_function(func_name):
             passed = updateRelease(int(sys.argv[2]), sys.argv[3])
         case "listReleases":
             #       [uid:int]
-            passed = listReleases(sys.argv[2])
+            listReleases(sys.argv[2])
         case "popularRelease":
             #         [n:int]
             passed = popularRelease(sys.argv[2])
@@ -277,12 +277,10 @@ def listReleases(uid):
     '''
     try:
         grabQ = f"""
-        SELECT DISTINCT rid, genre, title
-        FROM releases
-        WHERE rid IN (SELECT rid 
-        FROM reviews
-        WHERE uid = {uid})
-        ORDER BY title ASC
+        SELECT DISTINCT r.rid, r.genre, r.title
+        FROM releases r
+        JOIN reviews rev ON r.rid = rev.rid
+        ORDER BY r.title ASC
         """
         dbcursor.execute(grabQ)
         currTitles = dbcursor.fetchall()
