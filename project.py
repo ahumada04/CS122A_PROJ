@@ -327,7 +327,9 @@ def listReleases(uid):
         dbcursor.execute(grabQ)
         currTitles = dbcursor.fetchall()
         if currTitles:
-            tablePrinter(currTitles)
+            # tablePrinter(currTitles)
+            tablePrinter([(str(rid), genre, title) for rid, genre, title in rows])
+            return True
         else:
             # print("uid not found.")
             return False
