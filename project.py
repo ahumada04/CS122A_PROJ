@@ -39,6 +39,17 @@ def select_function(func_name):
         case "addGenre":
             #         [uid:int] [genres:str]
             passed = addGenre(sys.argv[2], sys.argv[3])
+        case "deleteViewer":
+            passed = deleteViewer(int(sys.argv[2]))
+        case "insertMovie":
+            passed = insertMovie(int(sys.argv[2]), sys.argv[3])
+        case "insertSession":
+            passed = insertSession(
+                int(sys.argv[2]), int(sys.argv[3]), int(sys.argv[4]), int(sys.argv[5]),
+                sys.argv[6], sys.argv[7], sys.argv[8], sys.argv[9]
+            )
+        case "updateRelease":
+            passed = updateRelease(int(sys.argv[2]), sys.argv[3])
         case "listReleases":
             #       [uid:int]
             passed = listReleases(sys.argv[2])
