@@ -320,7 +320,7 @@ def popularRelease(N):
         FROM releases r
         LEFT JOIN reviews rv ON r.rid = rv.rid
         GROUP BY r.rid, r.title
-        ORDER BY review_count DESC, r.rid ASC;
+        ORDER BY review_count DESC, r.rid DESC;
         LIMIT {N};
         """
         dbcursor.execute(grabQ)
