@@ -189,53 +189,17 @@ def addGenre(uid, genre) -> bool:
 #4- Delete viewer
 def deleteViewer(uid: int) -> bool:
     try:
-    #     # delete_viewer = f"DELETE FROM viewers WHERE uid = {uid};"
-    #     # delete_user = f"DELETE FROM users WHERE uid = {uid};"
-    #     # dbcursor.execute(delete_viewer)
-    #     # dbcursor.execute(delete_user)
+        # delete_viewer = f"DELETE FROM viewers WHERE uid = {uid};"
+        # delete_user = f"DELETE FROM users WHERE uid = {uid};"
+        # dbcursor.execute(delete_viewer)
+        # dbcursor.execute(delete_user)
 
-    #     dbcursor.execute(f"SELECT uid FROM viewers WHERE uid = {uid};")
-    #     if not dbcursor.fetchone():
-    #         return False  
-        
-    #     dbcursor.execute(f"DELETE FROM sessions WHERE uid = {uid};")
-    #     dbcursor.execute(f"DELETE FROM reviews WHERE uid = {uid};")
-
-    #     # Delete viewer
-    #     dbcursor.execute(f"DELETE FROM viewers WHERE uid = {uid};")
-    #     db.commit()  # Commit after deleting viewer
-
-    #     # Delete user (only after the viewer is successfully deleted)
-    #     dbcursor.execute(f"DELETE FROM users WHERE uid = {uid};")
-    #     db.commit()  # Commit after deleting user
-
-    #     # Verify deletion by checking if the uid still exists
-    #     dbcursor.execute(f"SELECT uid FROM users WHERE uid = {uid};")
-    #     if dbcursor.fetchone():
-    #         return False  # If UID still exists in `users`, deletion failed
-
-    #     return True
-        
-    # except mysql.connector.Error as err:
-    #     print(f"Database Error: {err}")
-    #     return False
-
-    # Check if viewer exists
         dbcursor.execute(f"SELECT uid FROM viewers WHERE uid = {uid};")
-        result = dbcursor.fetchone()
-        if not result:
-            print("Fail")  # Explicitly print Fail if UID does not exist
-            return False
-
-        # Debugging Log
-        print(f"Deleting viewer {uid} and dependent records...")
-
-        # Delete dependent records first
+        if not dbcursor.fetchone():
+            return False  
+        
         dbcursor.execute(f"DELETE FROM sessions WHERE uid = {uid};")
-        db.commit()  # Commit after session deletion
-
         dbcursor.execute(f"DELETE FROM reviews WHERE uid = {uid};")
-        db.commit()  # Commit after review deletion
 
         # Delete viewer
         dbcursor.execute(f"DELETE FROM viewers WHERE uid = {uid};")
@@ -245,17 +209,15 @@ def deleteViewer(uid: int) -> bool:
         dbcursor.execute(f"DELETE FROM users WHERE uid = {uid};")
         db.commit()  # Commit after deleting user
 
-        # Verify deletion
+        # Verify deletion by checking if the uid still exists
         dbcursor.execute(f"SELECT uid FROM users WHERE uid = {uid};")
         if dbcursor.fetchone():
-            print("Fail")  # If UID still exists, deletion failed
-            return False
+            return False  # If UID still exists in `users`, deletion failed
 
-        print("Success")  # Explicitly print Success if deletion worked
         return True
+
     except mysql.connector.Error as err:
         print(f"Database Error: {err}")
-        print("Fail")  # Print Fail in case of an error
         return False
 
 #5 - insert
