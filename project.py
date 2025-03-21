@@ -55,7 +55,7 @@ def select_function(func_name):
             listReleases(sys.argv[2])
         case "popularRelease":
             #         [n:int]
-            passed = popularRelease(sys.argv[2])
+            popularRelease(sys.argv[2])
         case "releaseTitle":
             #         [sid:int]
             passed = releaseTitle(sys.argv[2])
