@@ -327,9 +327,7 @@ def listReleases(uid):
         dbcursor.execute(grabQ)
         currTitles = dbcursor.fetchall()
         if currTitles:
-            # tablePrinter(currTitles)
-            tablePrinter([(str(rid), genre, title) for rid, genre, title in rows])
-            return True
+            tablePrinter(currTitles)
         else:
             # print("uid not found.")
             return False
@@ -355,8 +353,9 @@ def popularRelease(N):
         SELECT r.rid, r.title, CAST(COUNT(rv.rid) AS CHAR) AS review_count
         FROM releases r
         LEFT JOIN reviews rv ON r.rid = rv.rid
-        GROUP BY r.rid
-        ORDER BY review_count DESC;
+        GROUP BY r.rid, r.title
+        ORDER BY review_count DESC, r.rid ASC;
+        LIMIT {N};
         """
         dbcursor.execute(grabQ)
         currTitles = dbcursor.fetchall()
