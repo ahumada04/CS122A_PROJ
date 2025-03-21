@@ -68,9 +68,9 @@ CREATE TABLE sessions(
 	quality ENUM('480p', '720p', '1080p') ,
 	device ENUM("mobile", "desktop") , 
 	PRIMARY KEY (sid),
-	FOREIGN KEY (uid) REFERENCES viewers(uid) ON DELETE NO ACTION, 
+	FOREIGN KEY (uid) REFERENCES viewers(uid) ON DELETE CASCADE, 
 	FOREIGN KEY (rid, ep_num) REFERENCES videos(rid, ep_num) 
-ON DELETE NO ACTION );
+ON DELETE CASCADE );
 
 CREATE TABLE reviews(
 	rvid CHAR(8) NOT NULL,
@@ -80,5 +80,5 @@ CREATE TABLE reviews(
 	body VARCHAR(255), 
 	posted_at VARCHAR(255),
 	PRIMARY KEY (rvid),
-	FOREIGN KEY (uid) REFERENCES viewers(uid),
-	FOREIGN KEY (rid) REFERENCES releases(rid) );
+	FOREIGN KEY (uid) REFERENCES viewers(uid) ON DELETE CASCADE, 
+	FOREIGN KEY (rid) REFERENCES releases(rid) ON DELETE CASCADE );
