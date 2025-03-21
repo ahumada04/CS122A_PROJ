@@ -40,8 +40,16 @@ def select_function(func_name):
             #         [uid:int] [genres:str]
             passed = addGenre(sys.argv[2], sys.argv[3])
         case "deleteViewer":
-            #         [uid:int]
-            passed = deleteViewer(sys.argv[2])
+            passed = deleteViewer(int(sys.argv[2]))
+        case "insertMovie":
+            passed = insertMovie(int(sys.argv[2]), sys.argv[3])
+        case "insertSession":
+            passed = insertSession(
+                int(sys.argv[2]), int(sys.argv[3]), int(sys.argv[4]), int(sys.argv[5]),
+                sys.argv[6], sys.argv[7], sys.argv[8], sys.argv[9]
+            )
+        case "updateRelease":
+            passed = updateRelease(int(sys.argv[2]), sys.argv[3])
         case "listReleases":
             #       [uid:int]
             passed = listReleases(sys.argv[2])
@@ -205,6 +213,7 @@ def deleteViewer(uid: int) -> bool:
         return False
 
 
+
 # #5 - insert
 def insertMovie(rid: int, website_url: str) -> bool:
     try:
@@ -228,14 +237,12 @@ def insertSession(sid: int, uid: int, rid: int, ep_num: int, initiate_at: str, l
 
         dbcursor.execute(f"SELECT uid FROM viewers WHERE uid = {uid};")
         if not dbcursor.fetchone():
-            return False  # Viewer not found
+            return False  
 
-        # Ensure Video exists
         dbcursor.execute(f"SELECT rid FROM videos WHERE rid = {rid} AND ep_num = {ep_num};")
         if not dbcursor.fetchone():
-            return False  # Video not found
+            return False 
 
-        # Insert session
         insert_session = f"""
         INSERT INTO sessions (sid, uid, rid, ep_num, initiate_at, leave_at, quality, device)
         VALUES ({sid}, {uid}, {rid}, {ep_num}, '{initiate_at}', '{leave_at}', '{quality}', '{device}');
@@ -306,8 +313,9 @@ def popularRelease(N):
         SELECT r.rid, r.title, CAST(COUNT(rv.rid) AS CHAR) AS review_count
         FROM releases r
         LEFT JOIN reviews rv ON r.rid = rv.rid
-        GROUP BY r.rid
-        ORDER BY review_count DESC;
+        GROUP BY r.rid, r.title
+        ORDER BY review_count DESC, r.rid ASC;
+        LIMIT {N};
         """
         dbcursor.execute(grabQ)
         currTitles = dbcursor.fetchall()
