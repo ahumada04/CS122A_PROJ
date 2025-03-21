@@ -58,11 +58,11 @@ def select_function(func_name):
             popularRelease(sys.argv[2])
         case "releaseTitle":
             #         [sid:int]
-            passed = releaseTitle(sys.argv[2])
+            releaseTitle(sys.argv[2])
 
         case "activeViewer":
             #         [N:int] [start:date] [end:date]
-            passed = activeViewer(sys.argv[2], sys.argv[3], sys.argv[4])
+            activeViewer(sys.argv[2], sys.argv[3], sys.argv[4])
         case "videosViewed":
             #         [rid:int]
             videosViewed(sys.argv[2])
