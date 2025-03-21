@@ -401,8 +401,10 @@ def videosViewed(rid):
         LEFT JOIN   sessions s ON v.rid = s.rid AND v.ep_num = s.ep_num
         WHERE   v.rid = {rid}
         GROUP BY    v.rid, v.ep_num, v.title, v.length
-        ORDER BY     v.rid DESC;
+        ORDER BY     viewer_count DESC;
         """
+# ORDER BY     v.rid DESC;
+
         dbcursor.execute(grabQ)
         currTitles = dbcursor.fetchall()
         if currTitles:
